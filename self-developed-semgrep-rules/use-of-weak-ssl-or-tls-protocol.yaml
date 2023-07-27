@@ -1,0 +1,64 @@
+rules:
+  - id: use-of-weak-ssl-or-tls-protocol
+    pattern-either:
+      - patterns:
+          - pattern: |
+              $CONFIG = array(
+                ... ,
+                "ssl" => [..., $FIELD => $PROTOCOL,...],
+                ... ,
+              );
+              ...
+              $RESULT = stream_context_create($CONFIG);
+          - metavariable-regex:
+              metavariable: $PROTOCOL
+              regex: .*(?i)(STREAM_CRYPTO_METHOD_TLSv1_1|STREAM_CRYPTO_METHOD_TLSv1_0|STREAM_CRYPTO_METHOD_SSL).*
+          - metavariable-regex:
+              metavariable: $FIELD
+              regex: .*(?i)(crypto_method|crypto_type).*
+      - patterns:
+          - pattern: |
+              $RESULT = stream_context_create(array(
+                ... ,
+                "ssl" => [..., $FIELD => $PROTOCOL,...],
+                ... ,
+              ));
+          - metavariable-regex:
+              metavariable: $PROTOCOL
+              regex: .*(?i)(STREAM_CRYPTO_METHOD_TLSv1_1|STREAM_CRYPTO_METHOD_TLSv1_0|STREAM_CRYPTO_METHOD_SSL).*
+          - metavariable-regex:
+              metavariable: $FIELD
+              regex: .*(?i)(crypto_method|crypto_type).*
+      - patterns:
+          - pattern: |
+              $ARG = $PROTOCOL;
+              ...
+              $CONFIG = array(
+                ... ,
+                "ssl" => [..., $FIELD => $PROTOCOL,...],
+                ... ,
+              );
+              ...
+              $RESULT = stream_context_create($CONFIG);
+          - metavariable-regex:
+              metavariable: $PROTOCOL
+              regex: .*(?i)(STREAM_CRYPTO_METHOD_TLSv1_1|STREAM_CRYPTO_METHOD_TLSv1_0|STREAM_CRYPTO_METHOD_SSL).*
+          - metavariable-regex:
+              metavariable: $FIELD
+              regex: .*(?i)(crypto_method|crypto_type).*
+    message: Detected the usage of weak SSL/TLS protocols.
+    languages:
+      - php
+    severity: WARNING
+    metadata:
+      owasp:
+        - A02:2021 - Cryptographic Failures
+      cwe:
+        - "CWE-327: Inadequate Encryption Strength"
+        - "CWE-326: Use of a Broken or Risky Cryptographic Algorithm"
+      references:
+        - https://rules.sonarsource.com/php/type/Vulnerability/RSPEC-4423
+      likelihood: LOW
+      impact: HIGH
+      confidence: MEDIUM
+

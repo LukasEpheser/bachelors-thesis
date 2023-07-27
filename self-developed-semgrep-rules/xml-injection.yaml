@@ -1,0 +1,29 @@
+rules:
+  - id: xml-injection
+    patterns:
+      - pattern-either:
+          - pattern: simplexml_load_string(..., LIBXML_NOENT, ...)
+          - pattern: |
+              $OBJECT = new DOMDocument();
+              ...
+              $OBJECT->load(..., LIBXML_NOENT, ...);
+          - pattern: >
+              $OBJECT = new XMLReader(); ... $OBJECT->setParserProperty(...,
+              XMLReader::SUBST_ENTITIES, true, ...);
+    message: Enabling external entities substitution can lead to XML injection
+      vulnerabilities.
+    languages:
+      - php
+    severity: WARNING
+    metadata:
+      owasp:
+        - A05:2021 - Security Misconfiguration
+      cwe:
+        - "CWE-611: Information Exposure Through XML External Entity Reference"
+        - "CWE-827: Improper Control of Document Type Definition"
+      references:
+        - https://rules.sonarsource.com/php/type/Vulnerability/RSPEC-2755
+      likelihood: HIGH
+      impact: HIGH
+      confidence: MEDIUM
+

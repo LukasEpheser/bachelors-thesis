@@ -1,0 +1,26 @@
+rules:
+  - id: openssl-weak-encryption-algorithm
+    pattern-either:
+      - patterns:
+          - pattern: openssl_encrypt($PLAINTEXT, $ALGO, ...)
+          - metavariable-regex:
+              metavariable: $ALGO
+              regex: .*(?i)(ecb).*
+      - patterns:
+          - pattern: openssl_public_encrypt($DATA, $CRYPTED, $KEY, OPENSSL_NO_PADDING, ...)
+    message: The ECB cipher mode doesn't provide serious message confidentiality and
+      should not be used.
+    languages:
+      - php
+    severity: WARNING
+    metadata:
+      owasp:
+        - A02:2021 - Cryptographic Failures
+      cwe:
+        - "CWE-327: Use of a Broken or Risky Cryptographic Algorithm"
+      references:
+        - https://rules.sonarsource.com/php/type/Vulnerability/RSPEC-5547
+      likelihood: LOW
+      impact: HIGH
+      confidence: LOW
+

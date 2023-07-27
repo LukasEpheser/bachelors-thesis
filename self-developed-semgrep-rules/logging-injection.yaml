@@ -1,0 +1,30 @@
+rules:
+  - id: logging-injection
+    mode: taint
+    pattern-sources:
+      - patterns:
+          - pattern-either:
+              - pattern: $_GET
+              - pattern: $_POST
+              - pattern: $_SERVER
+              - pattern: $_COOKIE
+              - pattern: $_REQUEST
+    pattern-sinks:
+      - pattern: error_log(..., $TAINTED, ...)
+    message: Storing user-provided data in logs can be dangerous. An attacker can
+      forge log content to prevent correct monitoring.
+    languages:
+      - php
+    severity: WARNING
+    metadata:
+      owasp:
+        - A03:2021 - Injection
+      cwe:
+        - "CWE-20: Improper Input Validation"
+        - "CWE-117: Improper Output Neutralization for Logs"
+      references:
+        - https://rules.sonarsource.com/php/type/Vulnerability/RSPEC-5145
+      likelihood: LOW
+      impact: LOW
+      confidence: LOW
+

@@ -1,0 +1,31 @@
+rules:
+  - id: laravel-non-literal-header
+    patterns:
+      - pattern: redirect(...)
+      - pattern-inside: |
+          Route::$METHOD(...)
+      - pattern-not: redirect("...")
+      - pattern-not: redirect()
+      - pattern-not: redirect()->route(...)
+      - pattern-not: redirect()->action(...)
+      - pattern-not: redirect()->with(...)
+    message: "Using user input when setting a redirect target with `redirect()` is
+      potentially dangerous. This could allow an attacker to inject a new line
+      and add a new header into the response. This is called HTTP response
+      splitting. To fix, do not allow whitespace inside `redirect()`:
+      '[^\\s]+'."
+    languages:
+      - php
+    severity: WARNING
+    metadata:
+      owasp:
+        - A01:2021 - Broken Access Control
+      cwe:
+        - "CWE-20: Improper Input Validation"
+        - "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')"
+      references:
+        - https://rules.sonarsource.com/php/type/Vulnerability/RSPEC-5131
+      likelihood: MEDIUM
+      impact: MEDIUM
+      confidence: MEDIUM
+

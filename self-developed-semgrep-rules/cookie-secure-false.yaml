@@ -1,0 +1,53 @@
+rules:
+  - id: cookie-secure-false
+    pattern-either:
+      - pattern: setcookie($NAME, $VALUE, $EXPIRES, $PATH, $DOMAIN, false, ...)
+      - pattern-either:
+          - pattern: |
+              setcookie(array(
+                ...,
+                'secure' => false,
+                ...,
+              ));
+          - pattern: |
+              $ARG = array(
+                ...,
+                'secure' => false,
+                ...,
+              );
+              ...
+              setcookie($NAME, $VALUE, $ARG);
+      - pattern-either:
+          - pattern: |
+              session_set_cookie_params(array(
+                ...,
+                'secure' => false,
+                ...,
+              ));
+          - pattern: |
+              $ARG = array(
+                ...,
+                'secure' => false,
+                ...,
+              );
+              ...
+              session_set_cookie_params($ARG);
+          - pattern: session_set_cookie_params($EXPIRES, $PATH, $DOMAIN, false, $HTTPONLY,
+              $SAMESITE);
+    message: The `secure` setting is set to `false` while creating a cookie. This
+      allows sending the cookie in plain-text within requests.
+    languages:
+      - php
+    severity: WARNING
+    metadata:
+      owasp:
+        - A05:2021 - Security Misconfiguration
+      references:
+        - https://owasp.org/www-community/controls/SecureCookieAttribute
+        - https://www.php.net/manual/en/function.setcookie.php
+      cwe:
+        - "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute"
+      likelihood: MEDIUM
+      impact: MEDIUM
+      confidence: HIGH
+

@@ -1,0 +1,29 @@
+rules:
+  - id: cookie-injection
+    mode: taint
+    pattern-sources:
+      - patterns:
+          - pattern-either:
+              - pattern: $_GET
+              - pattern: $_POST
+              - pattern: $_REQUEST
+    pattern-sinks:
+      - pattern: setcookie(..., $INPUT, ...)
+    message: A (session) cookie should not be assigned using untrusted data. This
+      can possibly lead to phishing vulnerabilities and sensitive data
+      disclosure.
+    languages:
+      - php
+    severity: WARNING
+    metadata:
+      owasp:
+        - A03:2021 - Injection
+      cwe:
+        - "CWE-20: Improper Input Validation"
+        - "CWE-384: Session Fixation"
+      references:
+        - https://rules.sonarsource.com/php/type/Vulnerability/RSPEC-6287
+      likelihood: HIGH
+      impact: LOW
+      confidence: MEDIUM
+

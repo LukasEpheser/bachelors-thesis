@@ -1,0 +1,54 @@
+rules:
+  - id: openssl-weak-encryption-key
+    pattern-either:
+      - patterns:
+          - pattern: |
+              $CONFIG = array(
+                ... ,
+                "private_key_bits" => $KEYSIZE,
+                ... ,
+              );
+              ...
+              $RESULT = openssl_pkey_new($CONFIG);
+          - metavariable-comparison:
+              comparison: $KEYSIZE < 2048 and $KEYSIZE % 2 == 0
+              metavariable: $KEYSIZE
+      - patterns:
+          - pattern: |
+              $RESULT = openssl_pkey_new(array(
+                ... ,
+                "private_key_bits" => $KEYSIZE,
+                ... ,
+              ));
+          - metavariable-comparison:
+              comparison: $KEYSIZE < 2048 and $KEYSIZE % 2 == 0
+              metavariable: $KEYSIZE
+      - patterns:
+          - pattern: |
+              $ARG = $KEYSIZE;
+              ...
+              $CONFIG = array(
+                ... ,
+                "private_key_bits" => $KEYSIZE,
+                ... ,
+              );
+              ...
+              $RESULT = openssl_pkey_new($CONFIG);
+          - metavariable-comparison:
+              comparison: $KEYSIZE < 2048 and $KEYSIZE % 2 == 0
+              metavariable: $KEYSIZE
+    message: Generates a new key for openssl using an unsufficient keysize.
+    languages:
+      - php
+    severity: WARNING
+    metadata:
+      owasp:
+        - A02:2021 - Cryptographic Failures
+      cwe:
+        - "CWE-326: Inadequate Encryption Strength"
+      references:
+        - https://rules.sonarsource.com/php/type/Vulnerability/RSPEC-4426
+      likelihood: LOW
+      impact: HIGH
+      confidence: MEDIUM
+

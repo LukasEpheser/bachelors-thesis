@@ -1,0 +1,35 @@
+rules:
+  - id: regex-injection
+    mode: taint
+    pattern-sources:
+      - patterns:
+          - pattern-either:
+              - pattern: $_GET
+              - pattern: $_POST
+              - pattern: $_SERVER
+              - pattern: $_COOKIE
+              - pattern: $_REQUEST
+    pattern-sanitizers:
+      - pattern: preg_quote($ARG)
+    pattern-sinks:
+      - patterns:
+          - pattern: preg_match($ARG, ...)
+          - focus-metavariable: $ARG
+    message: Untrusted data is used as a regex to scan a string without prior
+      sanitization or validation. This can lead to ReDoS vulnerabilities.
+    languages:
+      - php
+    severity: WARNING
+    metadata:
+      owasp:
+        - A03:2021 - Injection
+      cwe:
+        - "CWE-20: Improper Input Validation"
+        - "CWE-400: Uncontrolled Resource Consumption"
+        - "CWE-1333: Inefficient Regular Expression Complexity"
+      references:
+        - https://rules.sonarsource.com/php/type/Vulnerability/RSPEC-2631
+      likelihood: HIGH
+      impact: MEDIUM
+      confidence: MEDIUM
+

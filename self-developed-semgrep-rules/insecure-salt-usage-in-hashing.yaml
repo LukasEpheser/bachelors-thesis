@@ -1,0 +1,38 @@
+rules:
+  - id: insecure-salt-usage-in-hashing
+    pattern-either:
+      - patterns:
+          - pattern: |
+              $SALT = $SOURCE[...];
+              ...
+              $HASHINGALGORITHM($ALGO, $PASSWORD, $SALT, ...);
+          - metavariable-regex:
+              metavariable: $SOURCE
+              regex: .*\b(?i)(_SERVER|_POST|_GET|_COOKIES)\b.*
+          - metavariable-regex:
+              metavariable: $HASHINGALGORITHM
+              regex: .*\b(?i)(hash_pbkdf2|crypt)\b.*
+      - pattern: hash_pbkdf2($ALGO, $PASSWORD, '', ...);
+      - pattern: hash_pbkdf2($ALGO, $PASSWORD, ('...'), ...);
+      - pattern: crypt($PASSWORD)
+      - pattern: crypt($PASSWORD, '')
+      - pattern: crypt($PASSWORD, ('...'))
+    message: Non-random, reused, hardcoded, and user controllable salts within
+      hashing functions, which are specifically designed to hash passwords, like
+      `hash_pbkdf2` or `crypt` can increase the likelihood that an attacker can
+      use rainbow-attacks to guess a password.
+    languages:
+      - php
+    severity: WARNING
+    metadata:
+      owasp:
+        - A02:2021 - Cryptographic Failures
+      cwe:
+        - "CWE-759: Use of a One-Way Hash without a Salt"
+        - "CWE-760: Use of a One-Way Hash with a Predictable Salt"
+      references:
+        - https://rules.sonarsource.com/php/type/Vulnerability/RSPEC-2053
+      likelihood: LOW
+      impact: MEDIUM
+      confidence: MEDIUM
+

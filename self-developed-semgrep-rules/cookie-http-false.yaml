@@ -1,0 +1,53 @@
+rules:
+  - id: cookie-http-false
+    pattern-either:
+      - pattern: setcookie($NAME, $VALUE, $EXPIRES, $PATH, $DOMAIN, $SECURE, false, ...)
+      - pattern-either:
+          - pattern: |
+              setcookie($NAME, $VALUE, array(
+                ...,
+                'httponly' => false,
+                ...,
+              ));
+          - pattern: |
+              $ARG = array(
+                ...,
+                'httponly' => false,
+                ...,
+              );
+              ...
+              setcookie($NAME, $VALUE, $ARG);
+      - pattern-either:
+          - pattern: |
+              session_set_cookie_params(array(
+                ...,
+                'httponly' => false,
+                ...,
+              ));
+          - pattern: |
+              $ARG = array(
+                ...,
+                'httponly' => false,
+                ...,
+              );
+              ...
+              session_set_cookie_params($ARG);
+          - pattern: session_set_cookie_params($EXPIRES, $PATH, $DOMAIN, $SECURE, false,
+              $SAMESITE);
+    message: The `httponly` setting is set to `false` while creating a cookie. This
+      can increase the risk of XXS attacks as this allows client-side scripts to
+      access the cookie.
+    languages:
+      - php
+    severity: WARNING
+    metadata:
+      owasp:
+        - A05:2021 - Security Misconfiguration
+      cwe:
+        - "CWE-1004: Sensitive Cookie Without 'HttpOnly' Flag"
+      references:
+        - https://owasp.org/www-community/HttpOnly
+      likelihood: MEDIUM
+      impact: LOW
+      confidence: MEDIUM
+

@@ -1,0 +1,41 @@
+rules:
+  - id: ldap-injection
+    languages:
+      - php
+    severity: ERROR
+    message: Untrusted data is concatenated to an LDAP query without prior
+      sanitization or validation.
+    metadata:
+      owasp:
+        - A01:2017 - Injection
+        - A03:2021 - Injection
+      cwe:
+        - "CWE-20: Improper Input Validation"
+        - "CWE-90: Improper Neutralization of Special Elements used in an LDAP
+          Query ('LDAP Injection')"
+      references:
+        - https://rules.sonarsource.com/php/type/Vulnerability/RSPEC-2078
+        - https://owasp.org/www-community/attacks/SQL_Injection
+      category: security
+      technology:
+        - PHP
+        - LDAP
+      likelihood: HIGH
+      impact: HIGH
+      confidence: LOW
+    mode: taint
+    pattern-sanitizers:
+      - pattern-either:
+          - pattern: ldap_escape(...)
+          - pattern: $ldap_escape(...)
+    pattern-sources:
+      - patterns:
+          - pattern-either:
+              - pattern: $_GET
+              - pattern: $_POST
+              - pattern: $_SERVER
+              - pattern: $_COOKIE
+              - pattern: $_REQUEST
+    pattern-sinks:
+      - pattern: ldap_list(..., $EXPR, ...)
+

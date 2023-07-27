@@ -1,0 +1,51 @@
+rules:
+  - id: cookie-samesite-none
+    pattern-either:
+      - pattern-either:
+          - pattern: |
+              setcookie($NAME, $VALUE, array(
+                ...,
+                'samesite' => 'None',
+                ...,
+              ));
+          - pattern: |
+              $ARG = array(
+                ...,
+                'samesite' => 'None',
+                ...,
+              );
+              ...
+              setcookie($NAME, $VALUE, $ARG);
+      - pattern-either:
+          - pattern: |
+              session_set_cookie_params(array(
+                ...,
+                'samesite' => 'None',
+                ...,
+              ));
+          - pattern: |
+              $ARG = array(
+                ...,
+                'samesite' => 'None',
+                ...,
+              );
+              ...
+              session_set_cookie_params($ARG);
+          - pattern: session_set_cookie_params($EXPIRES, $PATH, $DOMAIN, $SECURE, $HTTPONLY,
+              'None');
+    message: The `samesite` attribute is set to `None` while creating a cookie. This
+      allows third-party actors to access the created cookie.
+    languages:
+      - php
+    severity: WARNING
+    metadata:
+      owasp:
+        - A05:2021 - Security Misconfiguration
+      cwe:
+        - "CWE-1275: Sensitive Cookie with Improper SameSite Attribute"
+      references:
+        - https://owasp.org/www-community/SameSite
+      likelihood: MEDIUM
+      impact: LOW
+      confidence: MEDIUM
+

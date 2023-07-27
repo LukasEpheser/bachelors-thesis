@@ -1,0 +1,36 @@
+rules:
+  - id: insecure-ini-configurations
+    pattern-either:
+      - patterns:
+          - pattern: ini_set($SETTING, $VALUE)
+          - metavariable-regex:
+              metavariable: $SETTING
+              regex: .*\b(?i)(file_uploads|enable_dl|session.use_trans_sid|allow_url_include|allow_url_fopen)\b.*
+          - metavariable-regex:
+              metavariable: $VALUE
+              regex: .*\b(?i)(1|true)\b.*
+      - patterns:
+          - pattern: ini_set($SETTING, $VALUE)
+          - metavariable-regex:
+              metavariable: $SETTING
+              regex: .*\b(?i)(cgi.force_redirect|session.cookie_secure)\b.*
+          - metavariable-regex:
+              metavariable: $VALUE
+              regex: .*\b(?i)(0|false)\b.*
+    message: Semgrep found insecure ini configurations, which are inherently
+      dangerous. Please refer to the given references.
+    languages:
+      - php
+    severity: WARNING
+    metadata:
+      owasp:
+        - A05:2021 - Security Misconfiguration
+      references:
+        - https://rules.sonarsource.com/php/type/Vulnerability/RSPEC-3338
+        - https://rules.sonarsource.com/php/type/Vulnerability/RSPEC-3334
+        - https://rules.sonarsource.com/php/type/Vulnerability/RSPEC-3337
+        - https://rules.sonarsource.com/php/type/Vulnerability/RSPEC-3336
+      likelihood: MEDIUM
+      impact: MEDIUM
+      confidence: LOW
+
